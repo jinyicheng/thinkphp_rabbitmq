@@ -149,7 +149,7 @@ class Rabbitmq
         $this->channel->basic_qos(null, $prefetch_count, null);
 
         $this->channel->basic_consume($this->options['connection']['channel']['queue']['name'], '', false, false, false, false, function ($message) use ($closure) {
-            if ($closure($message)) $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
+            if ($closure($message->body)) $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
         });
         while (count($this->channel->callbacks)) {
             $this->channel->wait();
