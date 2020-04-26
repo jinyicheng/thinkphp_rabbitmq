@@ -24,7 +24,7 @@
     "extra": {
         "think": {
             "config": {
-                "trace": "src/config.php"
+                "rabbitmq": "src/config.php"
             }
         }
     }
