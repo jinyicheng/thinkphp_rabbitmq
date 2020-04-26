@@ -20,5 +20,12 @@
         "psr-4": {
             "jinyicheng\\thinkphp_rabbitmq\\": "src/"
         }
+    },
+    "extra": {
+        "think": {
+            "config": {
+                "trace": "src/config.php"
+            }
+        }
     }
 }
