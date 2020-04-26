@@ -1,0 +1,24 @@
+{
+    "name": "jinyicheng/thinkphp_rabbitmq",
+    "description": "RabbitMQ",
+    "keywords": [
+        "thinkphp6",
+        "rabbitmq"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "jinyicheng",
+            "email": "234067496@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1.0",
+        "php-amqplib/php-amqplib": "^2.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "jinyicheng\\thinkphp_rabbitmq\\": "src/"
+        }
+    }
+}
