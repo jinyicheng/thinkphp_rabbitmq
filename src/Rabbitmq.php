@@ -134,7 +134,7 @@ class Rabbitmq
         /**
          * 声明消费者队列
          */
-        list($queue, ,) = $this->channel->queue_declare($this->options['connection']['channel']['queue']['name'], false, false, true, false);
+        list($queue, ,) = $this->channel->queue_declare($this->options['connection']['channel']['queue']['name'], false, true, false, false);
         /**
          * 绑定交换机
          * @var string $this ->options['connection']['channel']['exchange']['name'] 交换机名称
