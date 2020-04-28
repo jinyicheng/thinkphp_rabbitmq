@@ -103,6 +103,10 @@ class Rabbitmq
         if ($options['connection']['channel']['exchange']['type'] != 'fanout' && empty($options['connection']['channel']['routing_key'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>routing_key（路由键）无效');
         if (!isset($options['connection']['channel']['queue'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>queue（队列）配置获取失败');
         if (!isset($options['connection']['channel']['queue']['name'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>queue=>name（队列名称）配置获取失败');
+        if (!isset($options['connection']['channel']['queue']['passive'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>queue=>passive（是否被动）配置获取失败');
+        if (!isset($options['connection']['channel']['queue']['durable'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>queue=>durable（是否持久化）配置获取失败');
+        if (!isset($options['connection']['channel']['queue']['exclusive'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>queue=>exclusive（是否排他）配置获取失败');
+        if (!isset($options['connection']['channel']['queue']['auto_delete'])) throw new InvalidArgumentException('rabbitmq=>connection=>channel=>queue=>auto_delete（是否自动删除）配置获取失败');
 
         $hash = md5(json_encode($options));
         if (!isset(self::$instance[$hash])) {
@@ -128,13 +132,20 @@ class Rabbitmq
 
     /**
      * @param Closure $closure
+     * @param int $prefetch_count
      */
-    public function receive(Closure $closure)
+    public function receive(Closure $closure,int $prefetch_count=1)
     {
         /**
          * 声明消费者队列
          */
-        list($queue, ,) = $this->channel->queue_declare($this->options['connection']['channel']['queue']['name'], false, true, false, false);
+        list($queue, ,) = $this->channel->queue_declare(
+            $this->options['connection']['channel']['queue']['name'],
+            $this->options['connection']['channel']['queue']['passive'],
+            $this->options['connection']['channel']['queue']['durable'],
+            $this->options['connection']['channel']['queue']['exclusive'],
+            $this->options['connection']['channel']['queue']['auto_delete']
+        );
         /**
          * 绑定交换机
          * @var string $this ->options['connection']['channel']['exchange']['name'] 交换机名称
@@ -143,9 +154,8 @@ class Rabbitmq
         $this->channel->queue_bind($queue, $this->options['connection']['channel']['exchange']['name'], $this->options['connection']['channel']['routing_key']);
         /**
          * 消费消息
-         * @var string $prefetch_count 设置prefetch_count=1。这样是告诉RabbitMQ，再同一时刻，不要发送超过1条消息给一个工作者（worker），直到它已经处理了上一条消息并且作出了响应。这样，RabbitMQ就会把消息分发给下一个空闲的工作者（worker），轮询、负载均衡配置
+         * @var int $prefetch_count 设置prefetch_count=1。这样是告诉RabbitMQ，再同一时刻，不要发送超过1条消息给一个工作者（worker），直到它已经处理了上一条消息并且作出了响应。这样，RabbitMQ就会把消息分发给下一个空闲的工作者（worker），轮询、负载均衡配置
          */
-        $prefetch_count = 1;
         $this->channel->basic_qos(null, $prefetch_count, null);
 
         $this->channel->basic_consume($this->options['connection']['channel']['queue']['name'], '', false, false, false, false, function ($message) use ($closure) {
